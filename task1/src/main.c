@@ -25,63 +25,23 @@ struct thread_args {
   int size;
 };
 
+int *input(int *size);
+
+void create_threads(int size, int thread_count, int *data, struct thread_args *args);
+
 int main(int argc, char *argv[])
 {
   if (argc != 2) return -1;
-  int thread_count = 0;
-  thread_count = atoi(argv[1]);
-  int n;
-  int counter = 0;
-  struct list *list = list_init(0);
-  struct list *current = list;
-  while (1) {
-    scanf("%d", &n);
-    if (counter == 0) {
-      list->value = n;
-    }
-    else {
-      struct list *new = list_init(n);
-      current->next = new;
-      current = new;
-    }
-    char c = getchar();
-    counter++;
-    if (c == '\n') break;
-  }
-  int **matrix = malloc(sizeof(int*) * thread_count);
-  current = list;
+  int thread_count = atoi(argv[1]);
+  int size = 0;
+  int *data = input(&size);
   printf("\n");
-  pthread_t *threads = malloc(sizeof(pthread_t) * thread_count);
-  float batch_size_f = counter / (float)thread_count;
   struct thread_args *args = malloc(sizeof(struct thread_args) * thread_count);
-  for (int i = 0; i < thread_count; i++) {
-    struct thread_args *arg = &args[i];
-    int a = batch_size_f * (float)i;
-    if (a - (int) a > 0.001) {
-      a = (int) a + 1;
-    }
-    int b = batch_size_f * (float)(i + 1);
-    if (b - (int) b > 0.001) {
-      b = (int) b + 1;
-    }
-    arg->size = b - a;
-    int *array = malloc(sizeof(int) * arg->size);
-    for (int i = 0; i < arg->size; i++) {
-      array[i] = current->value;
-      current = current->next;
-    }
-    arg->array = array;
-    matrix[i] = array;
-    pthread_create(&threads[i], NULL, thread_function, (void*)arg);
-  }
-  for (int i = 0; i < thread_count; i++) {
-    pthread_join(threads[i], NULL);
-  }
-
-  int *sorted = malloc(sizeof(int) * counter);
+  create_threads(size, thread_count, data, args);
+  int *sorted = malloc(sizeof(int) * size);
   int *thread_idx = malloc(sizeof(int) * thread_count);
   memset(thread_idx, 0, thread_count);
-  for (int i = 0; i < counter; i++) {
+  for (int i = 0; i < size; i++) {
     int t_id = 0;
     int min = args[0].array[thread_idx[0]];
     for (int t = 0; t < thread_count; t++) {
@@ -95,11 +55,61 @@ int main(int argc, char *argv[])
     sorted[i] = args[t_id].array[thread_idx[t_id]];
     thread_idx[t_id]++;
   }
-  for (int i = 0; i < counter; i++) {
+  for (int i = 0; i < size; i++) {
     printf("%d ", sorted[i]);
   }
   printf("\n");
   return 0;
+}
+
+void create_threads(int size, int thread_count, int *data, struct thread_args *args) {
+  int **matrix = malloc(sizeof(int*) * thread_count);
+  pthread_t *threads = malloc(sizeof(pthread_t) * thread_count);
+  float batch_size_f = size / (float)thread_count;
+  int n = 0;
+  for (int i = 0; i < thread_count; i++) {
+    struct thread_args *arg = &args[i];
+    int a = batch_size_f * (float)i;
+    if (a - (int) a > 0.001) {
+      a = (int) a + 1;
+    }
+    int b = batch_size_f * (float)(i + 1);
+    if (b - (int) b > 0.001) {
+      b = (int) b + 1;
+    }
+    arg->size = b - a;
+    int *array = malloc(sizeof(int) * arg->size);
+    for (int i = 0; i < arg->size; i++) {
+      array[i] = data[n];
+      n++;
+    }
+    arg->array = array;
+    matrix[i] = array;
+    pthread_create(&threads[i], NULL, thread_function, (void*)arg);
+  }
+  for (int i = 0; i < thread_count; i++) {
+    pthread_join(threads[i], NULL);
+  }
+}
+
+int *input(int *size) {
+  int counter = 0;
+  int n;
+  int data_cap = 10;
+  int *data = malloc(sizeof(int) * data_cap);
+  while (1) {
+    scanf("%d", &n);
+    if (counter == data_cap) {
+      data_cap *= 2;
+      data = realloc(data, data_cap);
+    }
+    data[counter] = n;
+    char c = getchar();
+    counter++;
+    if (c == '\n') break;
+  }
+  *size = counter;
+  return data;
 }
 
 void test(int n) {
