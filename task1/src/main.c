@@ -78,13 +78,6 @@ int main(int argc, char *argv[])
     pthread_join(threads[i], NULL);
   }
 
-  for (int i = 0; i < thread_count; i++) {
-    for (int j = 0; j < args[i].size; j++) {
-      printf("%d ", args[i].array[j]);
-    }
-  }
-  printf("\n");
-
   int *sorted = malloc(sizeof(int) * counter);
   int *thread_idx = malloc(sizeof(int) * thread_count);
   memset(thread_idx, 0, thread_count);
@@ -93,14 +86,14 @@ int main(int argc, char *argv[])
     int min = args[0].array[thread_idx[0]];
     for (int t = 0; t < thread_count; t++) {
       int v = args[t].array[thread_idx[t]];
-      if (t >= args[t].size) continue;
+      if (thread_idx[t] >= args[t].size) continue;
       if (v < min) {
         min = v;
         t_id = t;
       }
     }
-    thread_idx[t_id]++;
     sorted[i] = args[t_id].array[thread_idx[t_id]];
+    thread_idx[t_id]++;
   }
   for (int i = 0; i < counter; i++) {
     printf("%d ", sorted[i]);
