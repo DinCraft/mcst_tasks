@@ -1,5 +1,7 @@
 #include "stdio.h"
 #include "stdlib.h"
+#include <pthread.h>
+#include <string.h>
 
 struct list {
   int value;
@@ -16,8 +18,18 @@ void print_array(int *array, int n);
 
 void test(int n);
 
+void *thread_function(void *arg);
+
+struct thread_args {
+  int *array;
+  int size;
+};
+
 int main(int argc, char *argv[])
 {
+  if (argc != 2) return -1;
+  int thread_count = 0;
+  thread_count = atoi(argv[1]);
   int n;
   int counter = 0;
   struct list *list = list_init(0);
@@ -36,18 +48,64 @@ int main(int argc, char *argv[])
     counter++;
     if (c == '\n') break;
   }
-  int *array = malloc(sizeof(int) * counter);
+  int **matrix = malloc(sizeof(int*) * thread_count);
   current = list;
-  for (int i = 0; i < counter; i++) {
-    array[i] = current->value;
-    current = current->next;
-  }
-  print_array(array, counter);
   printf("\n");
-  merge_sort(array, 0, counter / 2, counter);
-  print_array(array, counter);
+  pthread_t *threads = malloc(sizeof(pthread_t) * thread_count);
+  float batch_size_f = counter / (float)thread_count;
+  struct thread_args *args = malloc(sizeof(struct thread_args) * thread_count);
+  for (int i = 0; i < thread_count; i++) {
+    struct thread_args *arg = &args[i];
+    int a = batch_size_f * (float)i;
+    if (a - (int) a > 0.001) {
+      a = (int) a + 1;
+    }
+    int b = batch_size_f * (float)(i + 1);
+    if (b - (int) b > 0.001) {
+      b = (int) b + 1;
+    }
+    arg->size = b - a;
+    int *array = malloc(sizeof(int) * arg->size);
+    for (int i = 0; i < arg->size; i++) {
+      array[i] = current->value;
+      current = current->next;
+    }
+    arg->array = array;
+    matrix[i] = array;
+    pthread_create(&threads[i], NULL, thread_function, (void*)arg);
+  }
+  for (int i = 0; i < thread_count; i++) {
+    pthread_join(threads[i], NULL);
+  }
+
+  for (int i = 0; i < thread_count; i++) {
+    for (int j = 0; j < args[i].size; j++) {
+      printf("%d ", args[i].array[j]);
+    }
+  }
   printf("\n");
 
+  int *sorted = malloc(sizeof(int) * counter);
+  int *thread_idx = malloc(sizeof(int) * thread_count);
+  memset(thread_idx, 0, thread_count);
+  for (int i = 0; i < counter; i++) {
+    int t_id = 0;
+    int min = args[0].array[thread_idx[0]];
+    for (int t = 0; t < thread_count; t++) {
+      int v = args[t].array[thread_idx[t]];
+      if (t >= args[t].size) continue;
+      if (v < min) {
+        min = v;
+        t_id = t;
+      }
+    }
+    thread_idx[t_id]++;
+    sorted[i] = args[t_id].array[thread_idx[t_id]];
+  }
+  for (int i = 0; i < counter; i++) {
+    printf("%d ", sorted[i]);
+  }
+  printf("\n");
   return 0;
 }
 
@@ -60,6 +118,15 @@ void test(int n) {
   merge_sort(array, 0, n / 2, n);
   printf("\n");
   print_array(array, n);
+}
+
+void *thread_function(void *arg) {
+  struct thread_args *args = (struct thread_args *) arg;
+  int a = 0;
+  int b = args->size;
+  int m = b / 2;
+  merge_sort(args->array, a, m, b);
+  return NULL;
 }
 
 void print_array(int *array, int n) {
