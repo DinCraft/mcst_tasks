@@ -1,5 +1,5 @@
-main: src/main.c
-	gcc ${CFLAGS} src/main.c -o main
+task1: src/task1.c
+	gcc ${CFLAGS} src/task1.c -o task1
 
 clean:
-	rm main
+	rm task1

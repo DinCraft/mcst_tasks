@@ -3,18 +3,7 @@
 #include <pthread.h>
 #include <string.h>
 
-struct list {
-  int value;
-  struct list *next;
-};
-
-void list_append_value(struct list *l, int value);
-
-struct list *list_init(int value);
-
 void merge_sort(int *array, int a, int m, int b);
-
-void print_array(int *array, int n);
 
 void test(int n);
 
@@ -29,21 +18,32 @@ int *input(int *size);
 
 void create_threads(int size, int thread_count, int *data, struct thread_args *args);
 
+int *merge(int size, int thread_count, struct thread_args *args);
+
 int main(int argc, char *argv[])
 {
   if (argc != 2) return -1;
   int thread_count = atoi(argv[1]);
   int size = 0;
   int *data = input(&size);
-  printf("\n");
+  if (size < thread_count) thread_count = size;
   struct thread_args *args = malloc(sizeof(struct thread_args) * thread_count);
   create_threads(size, thread_count, data, args);
+  int *sorted = merge(size, thread_count, args);
+  for (int i = 0; i < size; i++) {
+    printf("%d ", sorted[i]);
+  }
+  printf("\n");
+  return 0;
+}
+
+int *merge(int size, int thread_count, struct thread_args *args) {
   int *sorted = malloc(sizeof(int) * size);
   int *thread_idx = malloc(sizeof(int) * thread_count);
   memset(thread_idx, 0, thread_count);
   for (int i = 0; i < size; i++) {
     int t_id = 0;
-    int min = args[0].array[thread_idx[0]];
+    int min = 0xFFFF;
     for (int t = 0; t < thread_count; t++) {
       int v = args[t].array[thread_idx[t]];
       if (thread_idx[t] >= args[t].size) continue;
@@ -55,11 +55,7 @@ int main(int argc, char *argv[])
     sorted[i] = args[t_id].array[thread_idx[t_id]];
     thread_idx[t_id]++;
   }
-  for (int i = 0; i < size; i++) {
-    printf("%d ", sorted[i]);
-  }
-  printf("\n");
-  return 0;
+  return sorted;
 }
 
 void create_threads(int size, int thread_count, int *data, struct thread_args *args) {
@@ -112,17 +108,6 @@ int *input(int *size) {
   return data;
 }
 
-void test(int n) {
-  int *array = malloc(sizeof(int) * n);
-  for (int i = 0; i < n; i++) {
-    array[i] = n - i;
-  }
-  print_array(array, n);
-  merge_sort(array, 0, n / 2, n);
-  printf("\n");
-  print_array(array, n);
-}
-
 void *thread_function(void *arg) {
   struct thread_args *args = (struct thread_args *) arg;
   int a = 0;
@@ -130,12 +115,6 @@ void *thread_function(void *arg) {
   int m = b / 2;
   merge_sort(args->array, a, m, b);
   return NULL;
-}
-
-void print_array(int *array, int n) {
-  for (int i = 0; i < n; i++) {
-    printf("%d ", array[i]);
-  }
 }
 
 void merge_sort(int *array, int a, int m, int b) {
@@ -169,18 +148,4 @@ void merge_sort(int *array, int a, int m, int b) {
   for (int i = 0; i < (b - a); i++) {
     array[a + i] = temp[i];
   }
-}
-
-struct list *list_init(int value) {
-  struct list *list = malloc(sizeof(struct list));
-  list->value = value;
-  list->next = NULL;
-  return list;
-}
-
-void list_append_value(struct list *l, int value) {
-  struct list *new = malloc(sizeof(struct list));
-  new->value = value;
-  new->next = NULL;
-  l->next = new;
 }
