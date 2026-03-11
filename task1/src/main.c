@@ -14,6 +14,8 @@ void merge_sort(int *array, int a, int m, int b);
 
 void print_array(int *array, int n);
 
+void test(int n);
+
 int main(int argc, char *argv[])
 {
   int n;
@@ -49,6 +51,17 @@ int main(int argc, char *argv[])
   return 0;
 }
 
+void test(int n) {
+  int *array = malloc(sizeof(int) * n);
+  for (int i = 0; i < n; i++) {
+    array[i] = n - i;
+  }
+  print_array(array, n);
+  merge_sort(array, 0, n / 2, n);
+  printf("\n");
+  print_array(array, n);
+}
+
 void print_array(int *array, int n) {
   for (int i = 0; i < n; i++) {
     printf("%d ", array[i]);
@@ -67,6 +80,25 @@ void merge_sort(int *array, int a, int m, int b) {
   }
   merge_sort(array, a, (m - a) / 2, m);
   merge_sort(array, m, m + (b - m) / 2, b);
+  int *temp = malloc(sizeof(int) * (b - a));
+  int i1 = a;
+  int i2 = m;
+  for (int i = 0; i < (b - a); i++) {
+    if (i1 < m) {
+      if (array[i1] < array[i2] || i2 >= b) {
+        temp[i] = array[i1];
+        i1++;
+        continue;
+      }
+    }
+    if (i2 < b) {
+      temp[i] = array[i2];
+      i2++;
+    }
+  }
+  for (int i = 0; i < (b - a); i++) {
+    array[a + i] = temp[i];
+  }
 }
 
 struct list *list_init(int value) {
