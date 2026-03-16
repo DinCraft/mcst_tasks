@@ -13,7 +13,11 @@ int main(int argc, char *argv[])
   int *data = input(&size);
   if (size < thread_count) thread_count = size;
   struct thread_args *args = malloc(sizeof(struct thread_args) * thread_count);
+  // сортировка проходит в два этапа
+  // сначала происходит разбиение массива на число частей, равных кол-ву потоков
+  // затем сортировка каждого подмассива в каждом из этих потоков
   create_threads(size, thread_count, data, args);
+  // здесь результаты работы потоков объединяются в новый отсортированный массив 
   int *sorted = merge(size, thread_count, args);
   for (int i = 0; i < size; i++) {
     printf("%d ", sorted[i]);

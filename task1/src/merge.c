@@ -9,7 +9,7 @@ int *merge(int size, int thread_count, struct thread_args *args) {
   memset(thread_idx, 0, thread_count);
   for (int i = 0; i < size; i++) {
     int t_id = 0;
-    int min = 0xFFFF;
+    int min = 0x7FFFFFFF;
     for (int t = 0; t < thread_count; t++) {
       int v = args[t].array[thread_idx[t]];
       if (thread_idx[t] >= args[t].size) continue;
@@ -21,14 +21,19 @@ int *merge(int size, int thread_count, struct thread_args *args) {
     sorted[i] = args[t_id].array[thread_idx[t_id]];
     thread_idx[t_id]++;
   }
+  for (int t = 0; t < thread_count; t++) {
+    // освобождение памяти для подмассивов
+    free((&args[t])->array);
+  }
+  free(thread_idx);
   return sorted;
 }
 
 void create_threads(int size, int thread_count, int *data, struct thread_args *args) {
-  int **matrix = malloc(sizeof(int*) * thread_count);
   pthread_t *threads = malloc(sizeof(pthread_t) * thread_count);
   float batch_size_f = size / (float)thread_count;
   int n = 0;
+  // разбиение массива на части
   for (int i = 0; i < thread_count; i++) {
     struct thread_args *arg = &args[i];
     int a = batch_size_f * (float)i;
@@ -40,13 +45,13 @@ void create_threads(int size, int thread_count, int *data, struct thread_args *a
       b = (int) b + 1;
     }
     arg->size = b - a;
+    // выделение памяти для подмассивов
     int *array = malloc(sizeof(int) * arg->size);
     for (int i = 0; i < arg->size; i++) {
       array[i] = data[n];
       n++;
     }
     arg->array = array;
-    matrix[i] = array;
     pthread_create(&threads[i], NULL, thread_function, (void*)arg);
   }
   for (int i = 0; i < thread_count; i++) {
