@@ -1,6 +1,7 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include <pthread.h>
+#include <string.h>
 #include "merge.h"
 
 int *input(int *size);
@@ -16,9 +17,9 @@ int main(int argc, char *argv[])
   // сортировка проходит в два этапа
   // сначала происходит разбиение массива на число частей, равных кол-ву потоков
   // затем сортировка каждого подмассива в каждом из этих потоков
-  create_threads(size, thread_count, data, args);
+  pthread_t *threads = create_threads(size, thread_count, data, args);
   // здесь результаты работы потоков объединяются в новый отсортированный массив 
-  int *sorted = merge(size, thread_count, args);
+  int *sorted = merge(size, thread_count, args, threads);
   for (int i = 0; i < size; i++) {
     printf("%d ", sorted[i]);
   }
@@ -32,11 +33,13 @@ int *input(int *size) {
   int n;
   int data_cap = 10;
   int *data = malloc(sizeof(int) * data_cap);
+  int *temp;
   while (1) {
     scanf("%d", &n);
     if (counter == data_cap) {
       data_cap *= 2;
-      data = realloc(data, data_cap);
+      temp = realloc(data, sizeof(int) * data_cap);
+      if (temp != NULL) data = temp;
     }
     data[counter] = n;
     char c = getchar();

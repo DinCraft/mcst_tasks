@@ -3,7 +3,7 @@
 #include <pthread.h>
 #include <string.h>
 
-int *merge(int size, int thread_count, struct thread_args *args) {
+int *merge(int size, int thread_count, struct thread_args *args, pthread_t *threads) {
   int *sorted = malloc(sizeof(int) * size);
   int *thread_idx = malloc(sizeof(int) * thread_count);
   memset(thread_idx, 0, thread_count);
@@ -25,11 +25,12 @@ int *merge(int size, int thread_count, struct thread_args *args) {
     // освобождение памяти для подмассивов
     free((&args[t])->array);
   }
+  free(threads);
   free(thread_idx);
   return sorted;
 }
 
-void create_threads(int size, int thread_count, int *data, struct thread_args *args) {
+pthread_t *create_threads(int size, int thread_count, int *data, struct thread_args *args) {
   pthread_t *threads = malloc(sizeof(pthread_t) * thread_count);
   float batch_size_f = size / (float)thread_count;
   int n = 0;
@@ -57,6 +58,7 @@ void create_threads(int size, int thread_count, int *data, struct thread_args *a
   for (int i = 0; i < thread_count; i++) {
     pthread_join(threads[i], NULL);
   }
+  return threads;
 }
 
 void *thread_function(void *arg) {
@@ -69,6 +71,7 @@ void *thread_function(void *arg) {
 }
 
 void merge_sort(int *array, int a, int m, int b) {
+  //if (a >= b) return;
   if (b - a == 1) return;
   if (b - a == 2) {
     if (array[a] > array[b - 1]) {
@@ -78,7 +81,7 @@ void merge_sort(int *array, int a, int m, int b) {
     }
     return;
   }
-  merge_sort(array, a, (m - a) / 2, m);
+  merge_sort(array, a, a + (m - a) / 2, m);
   merge_sort(array, m, m + (b - m) / 2, b);
   int *temp = malloc(sizeof(int) * (b - a));
   int i1 = a;
