@@ -8,6 +8,27 @@ int lex(const void *a, const void *b) {
 int rlex(const void *a, const void *b) {
   return lex(b, a);
 }
+int plain(const void *a, const void *b) {
+  const char *s1 = *(const char **)a;
+  const char *s2 = *(const char **)b;
+  for (int i = 0; i < 256; i++) {
+    char c1 = s1[i];
+    char c2 = s2[i];
+    if (c1 == c2) {
+      if (c1 == '\n') {
+        return 0;
+      }
+    }
+    else {
+      return c1 > c2 ? 1 : -1;
+    }
+  }
+  // unreachable, i guess
+  return 0;
+}
+int rplain(const void *a, const void *b) {
+  return plain(b, a);
+}
 
 int main(int argc, char *argv[])
 {
@@ -48,7 +69,7 @@ int main(int argc, char *argv[])
     printf("%s", lines[i]);
   }
   printf("---\n");
-  qsort(lines, idx, sizeof(char*), rlex);
+  qsort(lines, idx, sizeof(char*), rplain);
   for (int i = 0; i < idx; i++) {
     printf("%s", lines[i]);
   }
