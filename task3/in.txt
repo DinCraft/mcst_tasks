@@ -2,9 +2,16 @@ Hello, world!
 How are you?
 
 What are you doing?
+
+800y
+
 I love programming on C!
 
+15d
+
 how old are you?
+
+05m
 
 i play minecraft.
 and also touhou.

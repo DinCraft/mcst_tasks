@@ -1,38 +1,11 @@
 #include "stdio.h"
+#include "sorting.h"
 #include <stdlib.h>
 #include <string.h>
 
-int lex(const void *a, const void *b) {
-  return strcmp(*(const char **)a, *(const char **)b);
-}
-int rlex(const void *a, const void *b) {
-  return lex(b, a);
-}
-int plain(const void *a, const void *b) {
-  const char *s1 = *(const char **)a;
-  const char *s2 = *(const char **)b;
-  for (int i = 0; i < 256; i++) {
-    char c1 = s1[i];
-    char c2 = s2[i];
-    if (c1 == c2) {
-      if (c1 == '\n') {
-        return 0;
-      }
-    }
-    else {
-      return c1 > c2 ? 1 : -1;
-    }
-  }
-  // unreachable, i guess
-  return 0;
-}
-int rplain(const void *a, const void *b) {
-  return plain(b, a);
-}
-
 char **input(FILE *input_file, int *lines_amount);
 
-void output(char **lines, int *lines_amount, const char *ouput_name);
+int output(char **lines, int *lines_amount, const char *ouput_name);
 
 int main(int argc, char *argv[])
 {
@@ -43,6 +16,26 @@ int main(int argc, char *argv[])
   }
   const char *input_name = argv[1];
   const char *output_name = argv[2];
+  const char *sorting_method = argv[3];
+  int (*sm)(const void *, const void *);
+  // selecting sorting method
+  if (strcmp(sorting_method, "plain") == 0) {
+    sm = plain;
+  }
+  else if (strcmp(sorting_method, "rplain") == 0) {
+    sm = rplain;
+  }
+  else if (strcmp(sorting_method, "lex") == 0) {
+    sm = lex;
+  }
+  else if (strcmp(sorting_method, "rlex") == 0) {
+    sm = rlex;
+  }
+  else {
+    printf("Error: incorrect sorting method!\n");
+    printf("<sorting_method> : plain, rplain, lex, rlex\n");
+    return -1;
+  }
   FILE *input_file = fopen(input_name, "r");
   if (input_file == NULL) {
     printf("Error: file '%s' not found!\n", input_name);
@@ -51,18 +44,30 @@ int main(int argc, char *argv[])
   int lines_amount;
   char **lines = input(input_file, &lines_amount);
   fclose(input_file);
-  qsort(lines, lines_amount, sizeof(char*), plain);
-  output(lines, &lines_amount, output_name);
+  qsort(lines, lines_amount, sizeof(char*), sm);
+  int result = output(lines, &lines_amount, output_name);
+
+  // cleanup
+  for (int i = 0; i < lines_amount; i++) {
+    free(lines[i]);
+  }
+  free(lines);
+
+  if (result == -1) {
+    printf("Error while writing to file!\n");
+    return -1;
+  }
   return 0;
 }
 
-void output(char **lines, int *lines_amount, const char *ouput_name) {
+int output(char **lines, int *lines_amount, const char *ouput_name) {
   FILE *output_file = fopen(ouput_name, "w");
-  if (output_file == NULL) return;
+  if (output_file == NULL) return -1;
   for (int i = 0; i < *lines_amount; i++) {
     fputs(lines[i], output_file);
   }
   fclose(output_file);
+  return 0;
 }
 
 char **input(FILE *input_file, int *lines_amount) {
