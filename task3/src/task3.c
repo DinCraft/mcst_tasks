@@ -30,6 +30,8 @@ int rplain(const void *a, const void *b) {
   return plain(b, a);
 }
 
+char **input(FILE *input_file, int *lines_amount);
+
 int main(int argc, char *argv[])
 {
   if (argc != 4) {
@@ -40,10 +42,20 @@ int main(int argc, char *argv[])
   const char *input_name = argv[1];
   const char *output_name = argv[2];
   FILE *input_file = fopen(input_name, "r");
+  int lines_amount;
+  char **lines = input(input_file, &lines_amount);
   if (input_file == NULL) {
     printf("Error: file '%s' not found!\n", input_name);
     return -1;
   }
+  qsort(lines, lines_amount, sizeof(char*), plain);
+  for (int i = 0; i < lines_amount; i++) {
+    printf("%s", lines[i]);
+  }
+  return 0;
+}
+
+char **input(FILE *input_file, int *lines_amount) {
   char buffer[256];
   int array_size = 4;
   char **lines = malloc(sizeof(char*) * array_size);
@@ -65,13 +77,6 @@ int main(int argc, char *argv[])
       idx++;
     }
   }
-  for (int i = 0; i < idx; i++) {
-    printf("%s", lines[i]);
-  }
-  printf("---\n");
-  qsort(lines, idx, sizeof(char*), rplain);
-  for (int i = 0; i < idx; i++) {
-    printf("%s", lines[i]);
-  }
-  return 0;
+  *lines_amount = idx;
+  return lines;
 }
