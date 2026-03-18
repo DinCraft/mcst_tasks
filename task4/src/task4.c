@@ -3,18 +3,21 @@
 #include <stdlib.h>
 
 int main(int argc, char *argv[]) {
- int c;
- int digit_optind = 0;
+  int c;
+  int digit_optind = 0;
+  opterr = 0;
 
   while (1) {
     int this_option_optind = optind ? optind : 1;
     int option_index = 0;
     static struct option long_options[] = {
-     {"elbrus",  required_argument, 0,  0 }
+     {"elbrus",  required_argument, 0,  0}
     };
 
     c = getopt_long(argc, argv, "mcst", long_options, &option_index);
-    if (c == -1) break;
+    if (c == -1) {
+       break;
+    }
     switch (c) {
     case 0:
       printf("option %s", long_options[option_index].name);
@@ -39,6 +42,7 @@ int main(int argc, char *argv[]) {
       printf("option d with value '%s'\n", optarg);
       break;
     case '?':
+      printf("unknown option: %c\n", optopt);
       break;
     default:
       printf("?? getopt returned character code 0%o ??\n", c);
