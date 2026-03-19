@@ -1,11 +1,30 @@
- #include <getopt.h>
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+struct non_opt {
+  struct non_opt *next;
+  const char *value;
+};
+
+struct opt_data {
+  char m, c, s, t;
+  const char *elbrus;
+  const char *error;
+  struct non_opt *non_options;
+};
 
 int main(int argc, char *argv[]) {
   int c;
   int digit_optind = 0;
   opterr = 0;
+  struct opt_data od;
+  od.error = NULL;
+  od.non_options = NULL;
+  od.m = 0;
+  od.c = 0;
+  od.s = 0;
+  od.t = 0;
 
   while (1) {
     int this_option_optind = optind ? optind : 1;
@@ -21,26 +40,21 @@ int main(int argc, char *argv[]) {
     }
     switch (c) {
     case 0:
-      printf("option %s", long_options[option_index].name);
-      if (optarg) {
-        printf(" with arg %s", optarg);
+      if (option_index == 0) {
+        od.elbrus = optarg;
       }
-      printf("\n");
       break;
     case 'm':
-      printf("option m\n");
+      od.m = 1;
       break;
     case 'c':
-      printf("option c\n");
+      od.c = 1;
       break;
     case 's':
-      printf("option s\n");
+      od.s = 1;
       break;
     case 't':
-      printf("option t\n");
-      break;
-    case 'f':
-      printf("option d with value '%s'\n", optarg);
+      od.t = 1;
       break;
     case '?':
       /*if (optopt == 1) {
@@ -49,7 +63,7 @@ int main(int argc, char *argv[]) {
       else {
         printf("unknown option: %d\n", optopt);
       }*/
-      printf("unrecognized option %s\n", argv[optind - 1]);
+      od.error = argv[optind - 1];
       break;
     default:
       printf("?? getopt returned character code 0%o ??\n", c);
@@ -57,12 +71,28 @@ int main(int argc, char *argv[]) {
   }
 
   if (optind < argc) {
-    printf("non-option ARGV-elements: ");
+    struct non_opt *current;
     while (optind < argc) {
-      printf("%s ", argv[optind++]);
+      struct non_opt *new = malloc(sizeof(struct non_opt));
+      new->value = argv[optind];
+      new->next = NULL;
+      if (od.non_options == NULL) {
+        od.non_options = new;
+        current = od.non_options;
+      }
+      else {
+        current->next = new;
+        current = current->next;
+      }
+      optind++;
     }
-    printf("\n");
   }
 
-   return 0;
+  struct non_opt *non_option = od.non_options;
+  while (non_option != NULL) {
+    printf("%s\n", non_option->value);
+    non_option = non_option->next;
+  }
+
+  return 0;
 }
