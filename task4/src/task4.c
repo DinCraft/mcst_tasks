@@ -11,7 +11,8 @@ int main(int argc, char *argv[]) {
     int this_option_optind = optind ? optind : 1;
     int option_index = 0;
     static struct option long_options[] = {
-     {"elbrus",  required_argument, 0,  0}
+      {"elbrus",  required_argument, 0,  0},
+      {0,         0,                 0,  0}
     };
 
     c = getopt_long(argc, argv, "mcst", long_options, &option_index);
@@ -42,7 +43,13 @@ int main(int argc, char *argv[]) {
       printf("option d with value '%s'\n", optarg);
       break;
     case '?':
-      printf("unknown option: %c\n", optopt);
+      /*if (optopt == 1) {
+        printf("elbrus found!\n");
+      }
+      else {
+        printf("unknown option: %d\n", optopt);
+      }*/
+      printf("unrecognized option %s\n", argv[optind - 1]);
       break;
     default:
       printf("?? getopt returned character code 0%o ??\n", c);
