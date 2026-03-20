@@ -2,16 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct non_opt {
-  struct non_opt *next;
+struct list {
+  struct list *next;
   const char *value;
 };
 
 struct opt_data {
-  char m, c, s, t;
-  const char *elbrus;
+  char mcst[4];
   const char *error;
-  struct non_opt *non_options;
+  struct list *elbrus;
+  struct list *non_options;
 };
 
 int main(int argc, char *argv[]) {
@@ -21,10 +21,11 @@ int main(int argc, char *argv[]) {
   struct opt_data od;
   od.error = NULL;
   od.non_options = NULL;
-  od.m = 0;
-  od.c = 0;
-  od.s = 0;
-  od.t = 0;
+  for (int i = 0; i < 4; i++) {
+    od.mcst[i] = '-';
+  }
+  int mcst_ind = 0;
+  struct list *current2;
 
   while (1) {
     int this_option_optind = optind ? optind : 1;
@@ -41,20 +42,25 @@ int main(int argc, char *argv[]) {
     switch (c) {
     case 0:
       if (option_index == 0) {
-        od.elbrus = optarg;
+        struct list *new = malloc(sizeof(struct list));
+        new->value = optarg;
+        new->next = NULL;
+        if (od.elbrus == NULL) {
+          od.elbrus = new;
+          current2 = new;
+        }
+        else {
+          current2->next = new;
+          current2 = current2->next;
+        }
       }
       break;
     case 'm':
-      od.m = 1;
-      break;
     case 'c':
-      od.c = 1;
-      break;
     case 's':
-      od.s = 1;
-      break;
     case 't':
-      od.t = 1;
+      od.mcst[mcst_ind] = c;
+      mcst_ind++;
       break;
     case '?':
       /*if (optopt == 1) {
@@ -71,9 +77,9 @@ int main(int argc, char *argv[]) {
   }
 
   if (optind < argc) {
-    struct non_opt *current;
+    struct list *current;
     while (optind < argc) {
-      struct non_opt *new = malloc(sizeof(struct non_opt));
+      struct list *new = malloc(sizeof(struct list));
       new->value = argv[optind];
       new->next = NULL;
       if (od.non_options == NULL) {
@@ -88,11 +94,39 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  struct non_opt *non_option = od.non_options;
+  if (od.error != NULL) {
+    printf("Incorrect option: ");
+    // проверка на длину аргумента
+    if (od.error[1] == '-') {
+      printf("'%s'\n", &od.error[2]);
+    }
+    else {
+      printf("'%s'\n", &od.error[1]);
+    }
+    return -1;
+  }
+  printf("Short options: ");
+  for (int i = 0; i < 4; i++) {
+    if (od.mcst[i] != '-') {
+      printf("'%c' ", od.mcst[i]);
+    }
+  }
+  printf("\n");
+
+  printf("Long options: ");
+  struct list *elbrus = od.elbrus;
+  while (elbrus != NULL) {
+    printf("'elbrus=%s' ", elbrus->value);
+    elbrus = elbrus->next;
+  }
+  printf("\n");
+
+  printf("Non options: ");
+  struct list *non_option = od.non_options;
   while (non_option != NULL) {
-    printf("%s\n", non_option->value);
+    printf("'%s' ", non_option->value);
     non_option = non_option->next;
   }
-
+  printf("\n");
   return 0;
 }
