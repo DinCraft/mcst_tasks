@@ -1,11 +1,7 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-struct list {
-  struct list *next;
-  const char *value;
-};
+#include "list.h"
 
 struct opt_data {
   char mcst[4];
@@ -16,7 +12,6 @@ struct opt_data {
 
 int main(int argc, char *argv[]) {
   int c;
-  int digit_optind = 0;
   opterr = 0;
   struct opt_data od;
   od.error = NULL;
@@ -42,16 +37,13 @@ int main(int argc, char *argv[]) {
     switch (c) {
     case 0:
       if (option_index == 0) {
-        struct list *new = malloc(sizeof(struct list));
-        new->value = optarg;
-        new->next = NULL;
         if (od.elbrus == NULL) {
-          od.elbrus = new;
-          current2 = new;
+          od.elbrus = malloc(sizeof(struct list));
+          od.elbrus->value = optarg;
+          od.elbrus->next = NULL;
         }
         else {
-          current2->next = new;
-          current2 = current2->next;
+          list_add_last(od.elbrus, optarg);
         }
       }
       break;
@@ -63,32 +55,23 @@ int main(int argc, char *argv[]) {
       mcst_ind++;
       break;
     case '?':
-      /*if (optopt == 1) {
-        printf("elbrus found!\n");
-      }
-      else {
-        printf("unknown option: %d\n", optopt);
-      }*/
       od.error = argv[optind - 1];
       break;
     default:
-      printf("?? getopt returned character code 0%o ??\n", c);
+      break;
     }
   }
 
   if (optind < argc) {
     struct list *current;
     while (optind < argc) {
-      struct list *new = malloc(sizeof(struct list));
-      new->value = argv[optind];
-      new->next = NULL;
       if (od.non_options == NULL) {
-        od.non_options = new;
-        current = od.non_options;
+        od.non_options = malloc(sizeof(struct list));
+        od.non_options->value = argv[optind];
+        od.non_options->next = NULL;
       }
       else {
-        current->next = new;
-        current = current->next;
+        list_add_last(od.non_options, argv[optind]);
       }
       optind++;
     }
