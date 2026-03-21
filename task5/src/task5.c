@@ -42,21 +42,24 @@ const char* errno_name(int err) {
   }
 }
 
+void print_error(int error) {
+  perror("Error opening file");
+  printf("Errno = %s(%d)\n", errno_name(error), error);
+}
+
 int main(int argc, char *argv[])
 {
   char *file_name = "file.txt";
   int fd = open(file_name, O_RDONLY, S_IRWXU);
   int error = errno;
   if (fd == -1) {
-    perror("Error opening file");
-    printf("Errno = %s\n", errno_name(error));
+    print_error(error);
     return -1;
   }
   int result = close(fd);
   error = errno;
   if (result == -1) {
-    perror("Error closing file");
-    printf("Errno = %s\n", errno_name(error));
+    print_error(error);
     return -1;
   }
   return 0;
