@@ -3,6 +3,8 @@
 
 #include <sys/stat.h>
 
-void print_file_type(struct stat *sb);
+void print_file_type(unsigned int st_mode);
+
+void print_device(unsigned int st_dev);
 
 #endif//STAT_HELPER_H

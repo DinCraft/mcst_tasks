@@ -20,9 +20,14 @@ int main(int argc, char *argv[])
     return -1;
   }
   printf("%7s %s\n", "File:", argv[1]);
-  printf("%7s %-10ld Blocks: %-10ld IO Block: %-10ld", "Size:", sb.st_size, sb.st_blocks, sb.st_blksize);
-  print_file_type(&sb);
-  printf("Uid: %d\n", sb.st_uid);
-  
+  printf("%7s %-10ld", "Size:", sb.st_size);
+  printf("%7s %-10ld", "Blocks:", sb.st_blocks);
+  printf("%7s %-10ld", "IO Block:", sb.st_blksize);
+  print_file_type(sb.st_mode);
+  printf("%7s %d\n", "Uid:", sb.st_uid);
+  printf("%7s", "Device:");
+  print_device(sb.st_dev);
+  printf("%7s %-10ld", "Inode:", sb.st_ino);
+  printf("%7s %-10ld", "Links:", sb.st_nlink);
   return 0;
 }
