@@ -1,0 +1,4 @@
+When you try to read from a FIFO,
+  the command will block (wait) until another process opens the same FIFO for writing.
+The data is read on a first-in-first-out basis and is consumed as it is read;
+  it does not stay in the "file" after being read.
