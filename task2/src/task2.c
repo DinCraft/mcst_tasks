@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
       return -1;
     }
     read(fd, str, str_size);
-    printf("%s\n", str);
+    printf("%s", str);
     close(fd);
 
     // now open for writing
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
       return -1;
     }
     read(fd, str, str_size);
-    printf("%s\n", str);
+    printf("%s", str);
     close(fd);
   }
   return 0;
