@@ -3,56 +3,55 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   if (argc != 2) {
     printf("One arg required: <fifo filename>\n");
     return -1;
   }
   const char *fifo = argv[1];
+  const int str_size = 128;
+  char str[str_size];
   int fd = open(fifo, O_WRONLY | O_NONBLOCK);
-  char str[80];
-  if (fd == -1 && (errno == ENXIO || errno == EAGAIN)) {
-    fgets(str, 80, stdin);
-    fd = open(fifo, O_WRONLY);
-    if (fd == -1) {
-      perror("Error opening file");
-      return -1;
-    }
-    write(fd, str, 80);
-    close(fd);
-
+  // check if file is NOT opened for reading
+  if (fd == -1 && errno == ENXIO) {
+    // if NOT opened for reading then open file for it
     fd = open(fifo, O_RDONLY);
     if (fd == -1) {
       perror("Error opening file");
       return -1;
     }
-    read(fd, str, 80);
+    read(fd, str, str_size);
     printf("%s\n", str);
+    close(fd);
+
+    // now open for writing
+    fd = open(fifo, O_WRONLY | O_NONBLOCK);
+    if (fd == -1) {
+      perror("Error opening file");
+      return -1;
+    }
+    fgets(str, str_size, stdin);
+    write(fd, str, str_size);
     close(fd);
   }
   else {
-    if (fd != -1) {
-      close(fd);
+    // already opened
+    if (fd == -1) {
+      perror("Error opening file");
+      return -1;
     }
+    fgets(str, str_size, stdin);
+    write(fd, str, str_size);
+    close(fd);
+
     fd = open(fifo, O_RDONLY);
     if (fd == -1) {
       perror("Error opening file");
       return -1;
     }
-    read(fd, str, 80);
+    read(fd, str, str_size);
     printf("%s\n", str);
     close(fd);
-
-    fgets(str, 80, stdin);
-    fd = open(fifo, O_WRONLY);
-    if (fd == -1) {
-      perror("Error opening file");
-      return -1;
-    }
-    write(fd, str, 80);
-    close(fd);
   }
-
   return 0;
 }
