@@ -13,15 +13,44 @@ int main(int argc, char *argv[])
     printf("One argument required: <path_to_file>\n");
     return -1;
   }
+  pid_t p;
+  p = fork();
+  if(p<0) {
+    perror("fork fail");
+    exit(1);
+  }
+  else if ( p == 0) {
+    FILE *input_file = fopen(argv[1], "r");
+    if (input_file == NULL) {
+      printf("Error: file '%s' not found!\n", argv[1]);
+      return -1;
+    } 
+    int lines_amount = 0;
+    char **lines = input(input_file, &lines_amount);
+    fclose(input_file);
 
-  FILE *input_file = fopen(argv[1], "r");
-  if (input_file == NULL) {
-    printf("Error: file '%s' not found!\n", argv[1]);
-    return -1;
-  } 
+    FILE *output_file = fopen("child_copy", "w");
+    for (int i = 0; i < lines_amount; i++) {
+      fputs(lines[i], output_file);
+    }
+    fclose(output_file);
+  }
+  else {
+    FILE *input_file = fopen(argv[1], "r");
+    if (input_file == NULL) {
+      printf("Error: file '%s' not found!\n", argv[1]);
+      return -1;
+    } 
+    int lines_amount = 0;
+    char **lines = input(input_file, &lines_amount);
+    fclose(input_file);
 
-  int lines_amount = 0;
-  char **lines = input(input_file, &lines_amount);
+    FILE *output_file = fopen("parent_copy", "w");
+    for (int i = 0; i < lines_amount; i++) {
+      fputs(lines[i], output_file);
+    }
+    fclose(output_file);
+  }
 
   return 0;
 }
