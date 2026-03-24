@@ -43,7 +43,9 @@ struct opt_data *parse(int argc, char *argv[]) {
       mcst_ind++;
       break;
     case '?':
-      od->error = argv[optind - 1];
+      if (od->error == NULL) {
+        od->error = argv[optind - 1];
+      }
       break;
     default:
       break;
