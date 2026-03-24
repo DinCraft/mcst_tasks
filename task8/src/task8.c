@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <signal.h>
+#include "matrix.h"
 
 static struct option long_options[] = {
   {"signal",    no_argument, 0,  0},
@@ -12,6 +13,10 @@ void signal_handler(int sigid);
 
 void sigaction_handler(int sigid);
 
+extern int result_row, result_column, iter_index;
+
+void print_data();
+
 int main(int argc, char *argv[]) {
   if (argc != 2) {
     printf("One argument required: --signal or --sigaction\n");
@@ -21,30 +26,36 @@ int main(int argc, char *argv[]) {
   int c = getopt_long(argc, argv, "", long_options, &option_index);
   if (c == 0) {
     if (option_index == 0) {
-      printf("signal\n");
       signal(SIGINT, signal_handler);
     }
     else if (option_index == 1) {
-      printf("sigaction\n");
       struct sigaction sa;
       sa.sa_handler = sigaction_handler;
       sigaction(SIGINT, &sa, NULL);
     }
   }
-  else {
-    printf("idk\n");
-  }
-  while (1) {}
+  struct matrix m1, m2;
+  fill_matrix(&m1, 1);
+  fill_matrix(&m2, 101);
+  struct matrix result;
+  multiply_matrix(&m1, &m2, &result);
   return 0;
 }
 
+void print_data() {
+  printf("\n");
+  printf("%d %d\n", result_row, iter_index);
+  printf("%d %d\n", iter_index, result_column);
+  printf("%d %d\n", result_row, result_column);
+}
+
 void signal_handler(int sigid) {
-  printf("sigint\n");
+  print_data();
   signal(SIGINT, NULL);
 }
 
 void sigaction_handler(int sigid) {
-  printf("sigint\n ");
+  print_data();
   struct sigaction sa;
   sa.sa_handler = SIG_DFL;
   sigaction(SIGINT, &sa, NULL);
