@@ -1,5 +1,10 @@
-task9: src/task9.c 
-	gcc ${CFLAGS} src/task9.c -o task9
+task9: src/task9.c src/array_alg.c
+	gcc ${CFLAGS} src/task9.c src/array_alg.c -o task9
 
 clean:
-	rm task9
+	rm -f task9
+	rm -f test
+
+test: src/test.c src/array_alg.c
+	gcc ${CFLAGS} src/test.c src/array_alg.c -o test
+	./test
