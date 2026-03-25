@@ -17,6 +17,9 @@ int main(int argc, char *argv[]) {
   int *array = input_array(&size);
   int i1 = 0, i2 = 0;
   get_subsequence(array, size, &i1, &i2);
+  for (int i = i1; i <= i2; i++) {
+    printf("%d ", array[i]);
+  }
   return 0;
 }
 

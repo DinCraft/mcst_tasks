@@ -10,11 +10,27 @@ int test_id = 0;
 
 int main(int argc, char *argv[])
 {
+{
   int array[] = {1,2,3,4,5};
   int size = 5;
   int exp_maxlen = 5;
   int exp_count = 1;
   maxlen_and_count_test(array, size, exp_maxlen, exp_count);
+}
+{
+  int array[] = {0,1,2,3,0};
+  int size = 5;
+  int exp_maxlen = 4;
+  int exp_count = 1;
+  maxlen_and_count_test(array, size, exp_maxlen, exp_count);
+}
+{
+  int array[] = {1,2,3,0,4,5,6,0};
+  int size = 8;
+  int exp_maxlen = 4;
+  int exp_count = 1;
+  maxlen_and_count_test(array, size, exp_maxlen, exp_count);
+}
   return 0;
 }
 
