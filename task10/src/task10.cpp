@@ -13,8 +13,14 @@ int main (int argc, char *argv[]) {
   //get_token_from(str, 0);
 
   string s = remove_unused_spaces(str);
+  cout << s << endl;
+  for (int i = 0; i < s.length(); i++) {
+    cout << i << " " << s.at(i) << endl;
+  }
+  cout << endl;
   //int i = 0;
-  split_by_last_operation(s);
+  pair<pair<int,int>,pair<int,int>> bounds = split_by_last_operation(s, pair<int,int>(0, s.length()));
+  cout << bounds.first.first << endl;
   /*while (i != -1) {
     Token t = get_token_from(str, i, i);
     t.print();

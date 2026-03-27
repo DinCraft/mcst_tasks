@@ -7,7 +7,7 @@
 using namespace std;
 
 enum TokenType {
-  AND, OR, NOT, VAR, UNDEFINED
+  OR, AND, NOT, VAR, UNDEFINED
 };
 
 struct Token {
@@ -17,7 +17,7 @@ struct Token {
   void print();
 };
 
-pair<pair<int,int>,pair<int,int>> split_by_last_operation(const std::string &expr);
+pair<pair<int,int>,pair<int,int>> split_by_last_operation(const std::string &expr, pair<int,int> bounds);
 
 Token get_token_from(const std::string &expr, int ind, int &next);
 
