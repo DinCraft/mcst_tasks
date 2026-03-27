@@ -14,4 +14,6 @@ struct Expression {
   Expression(const string &expr);
 };
 
+string remove_unused_spaces(const string &expr);
+
 #endif // EXPRESSION_H

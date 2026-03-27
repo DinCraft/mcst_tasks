@@ -1,3 +1,4 @@
+#include "Expression.h"
 #include "Token.h"
 #include <iostream>
 #include <string>
@@ -11,10 +12,12 @@ int main (int argc, char *argv[]) {
   //cout << str << endl;
   //get_token_from(str, 0);
 
-  int i = 0;
-  while (i != -1) {
+  string s = remove_unused_spaces(str);
+  //int i = 0;
+  split_by_last_operation(s);
+  /*while (i != -1) {
     Token t = get_token_from(str, i, i);
     t.print();
-  }
+  }*/
   return 0;
 }

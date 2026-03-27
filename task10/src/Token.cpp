@@ -7,6 +7,7 @@ pair<pair<int,int>,pair<int,int>> split_by_last_operation(const std::string &exp
   // эти переменные описывают уровень вложенности скобок
   int level = 0;
   int min_level = 10;
+  int i1 = 0;
   for (int i = 0; i < expr.length(); i++) {
     if (expr.at(i) == '(') {
       level++;
@@ -15,9 +16,18 @@ pair<pair<int,int>,pair<int,int>> split_by_last_operation(const std::string &exp
       level--;
     }
     else {
-
+      if (i1 >= i) continue;
+      i1 = i;
+      Token token = get_token_from(expr, i1, i1);
+      if (i == -1) break;
+      i--;
+      //cout << "char: " << expr.at(i) << endl;
+      cout << level << ": ";
+      token.print();
+      cout << "=====" << endl;
     }
   }
+  return pair<pair<int,int>,pair<int,int>>(pair<int,int>(1,1),pair<int,int>(1,1));
 }
 
 void Token::print() {
