@@ -20,5 +20,6 @@ int main (int argc, char *argv[]) {
     if (i == -1) break;
   }*/
   Expression expr(str);
+  expr.print();
   return 0;
 }

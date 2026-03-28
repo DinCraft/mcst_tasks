@@ -8,7 +8,7 @@ int split_by_last_operation(const std::string &expr, pair<int,int> bounds, pair<
   int level = 0;
   int min_level = 10;
   int i1 = 0;
-  TokenType min_prior = NOT;
+  TokenType min_prior = AND;
   int min_op_id = 0;
   int op_length = 3;
   int operator_count = 0;
@@ -23,7 +23,7 @@ int split_by_last_operation(const std::string &expr, pair<int,int> bounds, pair<
       if (i1 >= i) continue;
       i1 = i;
       Token token = get_token_from(expr, i1, i1);
-      if (token.type != VAR && token.type != UNDEFINED) {
+      if (token.type != VAR && token.type != NOT && token.type != UNDEFINED) {
         operator_count++;
       }
       if (i == -1) break;
@@ -45,11 +45,11 @@ int split_by_last_operation(const std::string &expr, pair<int,int> bounds, pair<
             min_prior = token.type;
           }
         }
-        else if (min_prior == NOT) {
+        /*else if (min_prior == NOT) {
           min_op_id = i;
           min_level = level;
           min_prior = token.type;
-        }
+        }*/
       }
       //cout << level << ": ";
       //token.print();
@@ -57,12 +57,12 @@ int split_by_last_operation(const std::string &expr, pair<int,int> bounds, pair<
     }
     if (min_prior == OR) op_length = 2;
   }
-  if (operator_count == 0 || (operator_count == 1 && level == NOT)) return 1;
+  if (operator_count == 0 || (operator_count == 1 && level == NOT)) return -1;
   split.first.first = bounds.first;
   split.first.second = min_op_id + 1;
   split.second.first = min_op_id + 1 + op_length;
   split.second.second = bounds.second;
-  return 0;
+  return min_prior;
 }
 
 void Token::print() {
