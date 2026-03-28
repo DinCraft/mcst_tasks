@@ -12,18 +12,13 @@ int main (int argc, char *argv[]) {
   //cout << str << endl;
   //get_token_from(str, 0);
 
-  string s = remove_unused_spaces(str);
-  cout << s << endl;
-  for (int i = 0; i < s.length(); i++) {
-    cout << i << " " << s.at(i) << endl;
-  }
-  cout << endl;
-  //int i = 0;
-  pair<pair<int,int>,pair<int,int>> bounds = split_by_last_operation(s, pair<int,int>(0, s.length()));
-  cout << bounds.first.first << endl;
-  /*while (i != -1) {
+  str = remove_unused_spaces(str);
+  /*int i = 0;
+  while (1) {
     Token t = get_token_from(str, i, i);
     t.print();
+    if (i == -1) break;
   }*/
+  Expression expr(str);
   return 0;
 }

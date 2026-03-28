@@ -3,13 +3,15 @@
 #include <iostream>
 #include <string>
 
-pair<pair<int,int>,pair<int,int>> split_by_last_operation(const std::string &expr, pair<int,int> bounds) {
+int split_by_last_operation(const std::string &expr, pair<int,int> bounds, pair<pair<int,int>,pair<int,int>> &split) {
   // эти переменные описывают уровень вложенности скобок
   int level = 0;
   int min_level = 10;
   int i1 = 0;
   TokenType min_prior = NOT;
   int min_op_id = 0;
+  int op_length = 3;
+  int operator_count = 0;
   for (int i = bounds.first; i < bounds.second; i++) {
     if (expr.at(i) == '(') {
       level++;
@@ -21,10 +23,13 @@ pair<pair<int,int>,pair<int,int>> split_by_last_operation(const std::string &exp
       if (i1 >= i) continue;
       i1 = i;
       Token token = get_token_from(expr, i1, i1);
+      if (token.type != VAR && token.type != UNDEFINED) {
+        operator_count++;
+      }
       if (i == -1) break;
       i--;
       //cout << "char: " << expr.at(i) << endl;
-      
+      // определяем последнюю операцию
       if (level <= min_level && token.type != VAR) {
         if (min_prior == OR) {
           if (token.type == OR) {
@@ -46,12 +51,18 @@ pair<pair<int,int>,pair<int,int>> split_by_last_operation(const std::string &exp
           min_prior = token.type;
         }
       }
-      cout << level << ": ";
-      token.print();
-      cout << "=====" << endl;
+      //cout << level << ": ";
+      //token.print();
+      //cout << "=====" << endl;
     }
+    if (min_prior == OR) op_length = 2;
   }
-  return pair<pair<int,int>,pair<int,int>>(pair<int,int>(min_op_id,1),pair<int,int>(1,1));
+  if (operator_count == 0 || (operator_count == 1 && level == NOT)) return 1;
+  split.first.first = bounds.first;
+  split.first.second = min_op_id + 1;
+  split.second.first = min_op_id + 1 + op_length;
+  split.second.second = bounds.second;
+  return 0;
 }
 
 void Token::print() {

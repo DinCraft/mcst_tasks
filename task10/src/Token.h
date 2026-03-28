@@ -17,7 +17,7 @@ struct Token {
   void print();
 };
 
-pair<pair<int,int>,pair<int,int>> split_by_last_operation(const std::string &expr, pair<int,int> bounds);
+int split_by_last_operation(const std::string &expr, pair<int,int> bounds, pair<pair<int,int>,pair<int,int>> &split);
 
 Token get_token_from(const std::string &expr, int ind, int &next);
 
