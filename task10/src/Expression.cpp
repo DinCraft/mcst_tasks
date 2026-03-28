@@ -12,16 +12,77 @@ Expression::Expression(const string &expr) : Expression(expr, pair<int,int>(0, e
 }
 
 void Expression::print() {
-  if (exprLeft != nullptr) {
-    exprLeft->print();
-  }
   cout << expr.substr(left.first, left.second - left.first) << endl;
   if (op == OR) cout << " OR " << endl;
   else if (op == AND) cout << " AND " << endl;
   cout << expr.substr(right.first, right.second - right.first) << endl;
+  if (exprLeft != nullptr) {
+    exprLeft->print();
+  }
   if (exprRight != nullptr) {
     exprRight->print();
   }
+}
+
+int Expression::calculate(int bits) {
+  int next;
+  int l = 0, r = 0;
+  int result = 0;
+  if (op == OR || op == AND) {
+    if (leftSimple) {
+      Token t;
+      bool is_not = false;
+      t = get_token_from(expr, left.first, next);
+      if (t.type == NOT) {
+        t = get_token_from(expr, next, next);
+        is_not = true;
+      }
+      l = ((bits & (1 << ((int)t.var - 65))) >> ((int)t.var - 65)) % 2;
+      if (is_not) {
+        l++;
+        l %= 2;
+      }
+    }
+    else {
+      l = exprLeft->calculate(bits);
+    }
+    if (rightSimple) {
+      Token t;
+      bool is_not = false;
+      t = get_token_from(expr, right.first, next);
+      if (t.type == NOT) {
+        t = get_token_from(expr, next, next);
+        is_not = true;
+      }
+      r = ((bits & (1 << ((int)t.var - 65))) >> ((int)t.var - 65)) % 2;
+      if (is_not) {
+        r++;
+        r %= 2;
+      }
+    }
+    else {
+      r = exprRight->calculate(bits);
+    }
+  }
+  if (op == OR) {
+    result = l | r;
+  }
+  else if (op == AND) {
+    result = l & r;
+  }
+  return result;
+}
+bool is_simple(const string &expr) {
+  int i = 0;
+  bool isSimple = true;
+  while (1) {
+    Token t = get_token_from(expr, i, i);
+    if (t.type == UNDEFINED || i == -1) break;
+    if (t.type == AND || t.type == OR) {
+      isSimple = false;
+    }
+  }
+  return isSimple;
 }
 
 Expression::Expression(const string &expr, pair<int,int> bounds) : expr(expr) {
@@ -34,9 +95,13 @@ Expression::Expression(const string &expr, pair<int,int> bounds) : expr(expr) {
   left = split_bounds.first;
   right = split_bounds.second;
 
+  int next;
+
   string leftStr = expr.substr(left.first, left.second - left.first);
   leftStr = remove_unused_spaces(leftStr);
+  leftSimple = is_simple(leftStr);
   //cout << leftStr << endl;
+  //cout << is_simple(leftStr) << endl;
 
   op = (TokenType) code;
   //if (op == OR) cout << " OR " << endl;
@@ -44,7 +109,9 @@ Expression::Expression(const string &expr, pair<int,int> bounds) : expr(expr) {
 
   string rightStr = expr.substr(right.first, right.second - right.first);
   rightStr = remove_unused_spaces(rightStr);
+  rightSimple = is_simple(rightStr);
   //cout << rightStr << endl;
+  //cout << is_simple(rightStr) << endl;
 
   exprLeft = new Expression(expr, left);
   exprRight = new Expression(expr, right);

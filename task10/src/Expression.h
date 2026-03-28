@@ -12,12 +12,16 @@ struct Expression {
   pair<int,int> left, right;
   Expression *exprLeft, *exprRight;
   TokenType op;
+  bool leftSimple, rightSimple;
 
   Expression(const string &expr);
   Expression(const string &expr, pair<int,int> bounds);
 
   void print();
+  int calculate(int bits);
 };
+
+bool is_simple(const string &expr);
 
 string remove_unused_spaces(const string &expr);
 
