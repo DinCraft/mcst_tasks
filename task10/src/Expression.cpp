@@ -24,10 +24,12 @@ void Expression::print() {
   }
 }
 
-int Expression::calculate(int bits) {
+ 
+int Expression::calculate(int bits, const vector<char> &characters) {
   int next;
   int l = 0, r = 0;
   int result = 0;
+  int ch_ind = 0;
   if (op == OR || op == AND) {
     if (leftSimple) {
       Token t;
@@ -37,14 +39,20 @@ int Expression::calculate(int bits) {
         t = get_token_from(expr, next, next);
         is_not = true;
       }
-      l = ((bits & (1 << ((int)t.var - 65))) >> ((int)t.var - 65)) % 2;
+      for (int i = 0; i < characters.size(); i++) {
+        if (characters[i] == t.var) {
+          ch_ind = i;
+        }
+      }
+      //l = ((bits & (1 << ((int)t.var - 65))) >> ((int)t.var - 65)) % 2;
+      l = ((bits & (1 << ch_ind)) >> (ch_ind)) % 2;
       if (is_not) {
         l++;
         l %= 2;
       }
     }
     else {
-      l = exprLeft->calculate(bits);
+      l = exprLeft->calculate(bits, characters);
     }
     if (rightSimple) {
       Token t;
@@ -54,14 +62,20 @@ int Expression::calculate(int bits) {
         t = get_token_from(expr, next, next);
         is_not = true;
       }
-      r = ((bits & (1 << ((int)t.var - 65))) >> ((int)t.var - 65)) % 2;
+      for (int i = 0; i < characters.size(); i++) {
+        if (characters[i] == t.var) {
+          ch_ind = i;
+        }
+      }
+      //r = ((bits & (1 << ((int)t.var - 65))) >> ((int)t.var - 65)) % 2;
+      r = ((bits & (1 << ch_ind)) >> (ch_ind)) % 2;
       if (is_not) {
         r++;
         r %= 2;
       }
     }
     else {
-      r = exprRight->calculate(bits);
+      r = exprRight->calculate(bits, characters);
     }
   }
   if (op == OR) {

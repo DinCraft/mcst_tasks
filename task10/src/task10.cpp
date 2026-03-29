@@ -48,7 +48,7 @@ int main (int argc, char *argv[]) {
       cout << n << " ";
       sum += v * n;
     } 
-    cout << expr.calculate(sum) << endl;
+    cout << expr.calculate(sum, characters) << endl;
   }
   //expr.print();
   return 0;

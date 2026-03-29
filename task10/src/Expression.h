@@ -3,6 +3,7 @@
 
 #include <string>
 #include <utility>
+#include <vector>
 #include "Token.h"
 
 using namespace std;
@@ -18,7 +19,7 @@ struct Expression {
   Expression(const string &expr, pair<int,int> bounds);
 
   void print();
-  int calculate(int bits);
+  int calculate(int bits, const vector<char> &characters);
 };
 
 bool is_simple(const string &expr);
