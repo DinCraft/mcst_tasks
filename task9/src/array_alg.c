@@ -1,5 +1,4 @@
 #include "array_alg.h"
-#include <stdio.h>
 
 void get_subsequence(int *array, int size, int *_i1, int *_i2) {
   int maxlen = 0;
@@ -43,9 +42,6 @@ void get_subsequence(int *array, int size, int *_i1, int *_i2) {
   }
   *_i1 = mi1;
   *_i2 = mi2;
-  return;
-  printf("%d %d\n", mi1, mi2);
-  printf("%d\n", max_sum);
 }
 
 void maxlen_and_count(int *array, int size, int *maxlen, int *count) {
